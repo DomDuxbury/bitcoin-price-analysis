@@ -1,3 +1,4 @@
+from __future__ import division
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,3 +14,13 @@ def getPriceData():
     df = pd.concat([oct_df, nov_df])
     df.set_index(pd.to_datetime(df.index), inplace = True)
     return df
+
+def compareToDailyCycle(df):
+    
+    dailyCycle = df.groupby(df.index.hour).mean()['total']
+    
+    df["hour"] = df.index.hour
+    df = df.join(dailyCycle, on = "hour", how="outer", rsuffix="_mean")
+    df = df.sort_index()
+    
+    return df["total"] / df["total_mean"]
