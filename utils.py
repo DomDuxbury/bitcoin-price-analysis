@@ -24,3 +24,11 @@ def compareToDailyCycle(df):
     df = df.sort_index()
     
     return df["total"] / df["total_mean"]
+
+def getLabelledTweets():
+    df = pd.read_csv("data/sample/labelled.csv")
+    return df
+
+def getUnlabelledTweets():
+    df = pd.read_csv("data/sample/unlabelled.csv")
+    return df
