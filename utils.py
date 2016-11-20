@@ -25,8 +25,12 @@ def compareToDailyCycle(df):
     
     return df["total"] / df["total_mean"]
 
-def getLabelledTweets():
-    df = pd.read_csv("data/sample/labelled.csv")
+def getSpamLabelledTweets():
+    df = pd.read_csv("data/sample/spam-labelled.csv")
+    return df
+
+def getPosNeglabelledTweets():
+    df = pd.read_csv("data/sample/labelled_non_spam_tweets.csv")
     return df
 
 def getUnlabelledTweets():
