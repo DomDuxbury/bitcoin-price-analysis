@@ -31,8 +31,26 @@ def getAllTweets():
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 
+def getAllTweetsAggregated():
+    
+    df = pd.read_csv("data/all/21-11-2016-labelled.csv")
+    df["created_at"] = pd.to_datetime(df["created_at"])
+    
+    df["hour"] = df["created_at"].values.astype('<M8[h]')
+    aggregate = df.groupby(["hour", "label"]).count()
+    aggregate = aggregate["id"].reset_index()
+    aggregate.index = aggregate["hour"]
+    
+    groups = aggregate.groupby("label")
+
+    neg = groups.get_group("neg")["id"]
+    pos = groups.get_group("pos")["id"]
+    spam = groups.get_group("spam")["id"]
+    
+    return pd.DataFrame(dict(neg = neg, pos = pos, spam = spam))
+
 def getAllTweetsLabelled():
-    df = pd.read_csv("data/all/21-11-2016-labelled2.csv")
+    df = pd.read_csv("data/all/21-11-2016-labelled.csv")
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 
