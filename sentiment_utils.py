@@ -25,12 +25,12 @@ def extract_ngram_features(text, n):
             features[gram] = True
     return features
 
-def classifyDataframe(classifier, df):
+def classifyDataframe(classifier, df, ngrams):
     features = []
     for index, row in df.iterrows():
 
         ngram_features = extract_ngram_features(row["status"], ngrams)
-        features.append((ngram_features, row["label"]))
+        features.append(ngram_features)
         
     labels = classifier.classify_many(features)
     df["label"] = labels
