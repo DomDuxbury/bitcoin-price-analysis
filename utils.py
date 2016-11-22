@@ -54,12 +54,12 @@ def getAllTweetsLabelled():
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 
-def compareToDailyCycle(df):
+def compareToDailyCycle(df, column = "total"):
     
-    dailyCycle = df.groupby(df.index.hour).mean()['total']
+    dailyCycle = df.groupby(df.index.hour).mean()[column]
     
     df["hour"] = df.index.hour
     df = df.join(dailyCycle, on = "hour", how="outer", rsuffix="_mean")
     df = df.sort_index()
     
-    return df["total"] / df["total_mean"]
+    return df[column] / df[column + "_mean"]

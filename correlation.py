@@ -16,13 +16,13 @@ def main():
    
     df['ratio'] = utils.compareToDailyCycle(df)
     df = df.dropna()
-    peaks = df.where(df['ratio'] > 1.4).dropna()
+    df['peaks'] = df['ratio'] > 1.5
     
     allcorrelation = []
     peakcorrelation = []
     for hour in range(1, 25):
         allcorrelation.append(np.corrcoef(df['hour ' + str(hour)], df['ratio'])[0,1])
-        peakcorrelation.append(np.corrcoef(peaks['hour ' + str(hour)], peaks['ratio'])[0,1])
+        peakcorrelation.append(np.corrcoef(df['hour ' + str(hour)], df['peaks'])[0,1])
     
     allcorrelation = pd.DataFrame(allcorrelation)
     allcorrelation.columns = ['All Data']
