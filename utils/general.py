@@ -2,39 +2,44 @@ from __future__ import division
 from scipy.spatial.distance import pdist, squareform
 import pandas as pd
 import numpy as np
+import os, sys
+
+def getAbsPath(data_path):
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+    return os.path.join(project_root, data_path)
 
 def getTweetsData():
-    df = pd.read_csv("data/tweet-sum/tweets-timestamp.csv", index_col=["hour"])
+    df = pd.read_csv(getAbsPath("data/tweet-sum/tweets-timestamp.csv"), index_col=["hour"])
     df.set_index(pd.to_datetime(df.index), inplace = True)
     return df
 
 def getPriceData():
-    oct_df = pd.read_csv("data/bitcoin/coindesk-oct.csv", index_col=["Date"])
-    nov_df = pd.read_csv("data/bitcoin/coindesk-nov.csv", index_col=["Date"])
+    oct_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-oct.csv"), index_col=["Date"])
+    nov_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-nov.csv"), index_col=["Date"])
     df = pd.concat([oct_df, nov_df])
     df.set_index(pd.to_datetime(df.index), inplace = True)
     return df
 
 def getSpamLabelledTweets():
-    df = pd.read_csv("data/sample/spam-labelled.csv")
+    df = pd.read_csv(getAbsPath("data/sample/spam-labelled.csv"))
     return df
 
 def getPosNeglabelledTweets():
-    df = pd.read_csv("data/sample/labelled_non_spam_tweets.csv")
+    df = pd.read_csv(getAbsPath("data/sample/labelled_non_spam_tweets.csv"))
     return df
 
 def getUnlabelledTweets():
-    df = pd.read_csv("data/sample/unlabelled.csv")
+    df = pd.read_csv(getAbsPath("data/sample/unlabelled.csv"))
     return df
 
 def getAllTweets():
-    df = pd.read_csv("data/all/21-11-2016.csv")
+    df = pd.read_csv(getAbsPath("data/all/21-11-2016.csv"))
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 
 def getAllTweetsAggregated():
-    
-    df = pd.read_csv("data/all/21-11-2016-labelled.csv")
+   
+    df = pd.read_csv(getAbsPath("data/all/21-11-2016-labelled.csv"))
     df["created_at"] = pd.to_datetime(df["created_at"])
     
     df["hour"] = df["created_at"].values.astype('<M8[h]')
@@ -51,7 +56,7 @@ def getAllTweetsAggregated():
     return pd.DataFrame(dict(neg = neg, pos = pos, spam = spam))
 
 def getAllTweetsLabelled():
-    df = pd.read_csv("data/all/21-11-2016-labelled.csv")
+    df = pd.read_csv(getAbsPath("data/all/21-11-2016-labelled.csv"))
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 

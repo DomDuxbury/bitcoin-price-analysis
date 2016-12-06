@@ -1,9 +1,12 @@
+import os, sys
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(utils_path)
+import utils.general as utils
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import utils
-from pandas.lib import Timestamp
 
 def main():
     labelledTweets = utils.getAllTweetsAggregated() 

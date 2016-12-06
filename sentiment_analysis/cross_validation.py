@@ -1,6 +1,4 @@
 from __future__ import division
-import utils
-import sentiment_utils as su
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -8,7 +6,13 @@ import nltk.classify.util
 from nltk import ngrams
 from nltk.classify import NaiveBayesClassifier
 from nltk.classify import DecisionTreeClassifier 
- 
+
+import os, sys
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(utils_path)
+import utils.general as utils
+import utils.sentiment as su
+
 def main():
     unlabelledTweets = utils.getUnlabelledTweets() 
     unlabelledTweets["label"] = "n/a"
@@ -19,16 +23,7 @@ def main():
     test_spam_classifier(spamLabelledTweets) 
     test_pos_neg_classifier(posNegLabelledTweets) 
     
-    # full_spam_training_set = su.extract_tweet_features(spamLabelledTweets, 3) 
     
-    # spam_classifier = NaiveBayesClassifier.train(full_spam_training_set) 
-    
-    # newlylabelleddf = classifyDataframe(spam_classifier, unlabelledTweets)
-    # newlylabelleddf = newlylabelleddf.groupby("label").get_group("leg")
-    # newlylabelleddf = newlylabelleddf.iloc[np.random.permutation(len(newlylabelleddf))]
-    # newlylabelleddf.head(500).to_csv("data/output/labelled_tweets.csv")
-
-
 def test_spam_classifier(labelledTweets):
     
     labelledTweets = labelledTweets.iloc[np.random.permutation(len(labelledTweets))]

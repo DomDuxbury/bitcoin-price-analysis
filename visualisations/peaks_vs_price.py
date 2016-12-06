@@ -2,7 +2,12 @@ from __future__ import division
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+
+import os, sys
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(utils_path)
+import utils.general as utils
+
 
 def plotTweetDF(df):
    

@@ -2,8 +2,12 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import utils
 import scipy.spatial as sc
+
+import os, sys
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(utils_path)
+import utils.general as utils
 
 def main():
     price = utils.getPriceData()
@@ -13,7 +17,7 @@ def main():
     df = labelledTweets.join(price).dropna()
     
     for hour in range(1, 25):
-        df['hour ' + str(hour)] = df['Close Price'].shift(-1 * hour) - df['Close Price']
+        df['hour ' + str(hour)] = (df['Close Price'].shift(-1 * hour) - df['Close Price']) / df['Close Price']
 
     df = df.dropna()
     
@@ -23,7 +27,7 @@ def main():
     df["spam_ratio"] = utils.compareToDailyCycle(df, "spam")
   
     linear_corr = lambda x,y : np.corrcoef(x,y)[0,1]
-    correlation(df, linear_corr).plot()
+    correlation(df, linear_corr).plot(color = ["red", "green", "black", "blue"])
     correlation(df, utils.distcorr).plot()
 
     plt.ylabel("Correlation Coefficient")

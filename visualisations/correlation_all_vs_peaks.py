@@ -1,8 +1,12 @@
 from __future__ import division
-import utils
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+
+import os, sys
+utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.append(utils_path)
+import utils.general as utils
 
 def main():
 
@@ -12,7 +16,7 @@ def main():
     df = tweet_df.join(price_df) 
     df = df.dropna()
     for hour in range(1, 25):
-        df['hour ' + str(hour)] = df['Close Price'].shift(-1 * hour) - df['Close Price'].shift(-1 * (hour - 1))
+        df['hour ' + str(hour)] = (df['Close Price'].shift(-1 * hour) - df['Close Price']) / df['Close Price']
    
     df['ratio'] = utils.compareToDailyCycle(df)
     df = df.dropna()
