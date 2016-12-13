@@ -3,12 +3,18 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sklearn as sl
-from sklearn.naive_bayes import GaussianNB
+import pydotplus
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
+from sklearn.neural_network import MLPClassifier
 
 import os, sys
 utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(utils_path)
+
 import utils.general as utils
+import utils.model as model_utils
 
 def main():
     price = utils.getPriceData()
@@ -17,7 +23,8 @@ def main():
 
     df = labelledTweets.join(price).dropna()
     
-    df['return'] = (df['Close Price'].shift(-1) - df['Close Price']) / df['Close Price']
+    df['return'] = (df['Close Price'].shift(-9) - df['Close Price']) / df['Close Price']
+    df['recent_change'] = (df['Close Price'] - df['Close Price'].shift(1)) / df['Close Price']
     df['increase'] = df['return'] > 0
 
     df = df.dropna()
@@ -26,41 +33,28 @@ def main():
     df["pos_ratio"] = utils.compareToDailyCycle(df, "pos")
     df["neg_ratio"] = utils.compareToDailyCycle(df, "neg")
     df["spam_ratio"] = utils.compareToDailyCycle(df, "spam")
-    
-    features = df.as_matrix(columns = ["hour", "pos"])
+    for hour in range(1,13):
+        df['pos_ratio_hour_minus_' + str(hour)] = df["pos_ratio"].shift(hour)
+        # df['total_hour_minus_' + str(hour)] = df["pos_ratio"].shift(hour)
+        # df['pos_ratio_hour_minus_' + str(hour)] = df["pos_ratio"].shift(hour)
+
+    df = df.dropna() 
+    # df = df.head(5)
+    # df = df.iloc[np.random.permutation(len(df))]
+    features = df.as_matrix(columns = ["hour", "Close Price", "pos_ratio", "recent_change"])#, "pos_ratio", "total", "Close Price"])
+                                # "pos_ratio_hour_minus_1", "pos_ratio_hour_minus_2",
+                                # "pos_ratio_hour_minus_3", "pos_ratio_hour_minus_4",
+                                # "pos_ratio_hour_minus_5", "pos_ratio_hour_minus_6",
+                                # "pos_ratio_hour_minus_7", "pos_ratio_hour_minus_8"])
     labels = df.as_matrix(columns = ["increase"]).flatten()
+
+    # clf = MultinomialNB()
+    # clf = tree.DecisionTreeClassifier()
+    # clf = RandomForestClassifier(n_estimators=101)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10, 3), random_state=1)
     
-    cross_validate(features, labels, 5)
-
-def cross_validate(features, labels, noSections):
-    row_count = features.shape[0]
-    section_size = int(row_count / noSections)
-    accuracies = np.zeros(noSections)
-
-    for section in range(0,noSections):
-        start = section * section_size
-        end = (section + 1) * section_size
-
-        testIndexes = range(start, end+1)
-        trainIndexes = [n for n in range(0, row_count) if n not in set(testIndexes)]
-
-        test = features[testIndexes,:]
-        train = features[trainIndexes,:]
-
-        train_labels = labels[trainIndexes]
-        test_labels = labels[testIndexes]
-        
-        gnb = GaussianNB()
-        y_pred = gnb.fit(train, train_labels).predict(test)
-
-        mistakes = (test_labels != y_pred).sum()
-        predictions = test.shape[0] 
-
-        accuracy = (predictions - mistakes) / predictions
-        accuracies[section] = accuracy
-        print("Accuracy Split %d:\t %f" % (section + 1, accuracy))
-
-    print("\nMean accuracy:\t %f" % accuracies.mean())
+    confusion_matrices = model_utils.cross_validate(clf, features, labels, 60)
+    model_utils.report_results(confusion_matrices)
 
 if __name__ == "__main__":
     main()

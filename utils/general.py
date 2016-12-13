@@ -16,7 +16,8 @@ def getTweetsData():
 def getPriceData():
     oct_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-oct.csv"), index_col=["Date"])
     nov_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-nov.csv"), index_col=["Date"])
-    df = pd.concat([oct_df, nov_df])
+    dec_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-dec.csv"), index_col=["Date"])
+    df = pd.concat([oct_df, nov_df, dec_df])
     df.set_index(pd.to_datetime(df.index), inplace = True)
     return df
 
@@ -33,13 +34,13 @@ def getUnlabelledTweets():
     return df
 
 def getAllTweets():
-    df = pd.read_csv(getAbsPath("data/all/21-11-2016.csv"))
+    df = pd.read_csv(getAbsPath("data/all/08-12-2016.csv"))
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 
 def getAllTweetsAggregated():
    
-    df = pd.read_csv(getAbsPath("data/all/21-11-2016-labelled.csv"))
+    df = pd.read_csv(getAbsPath("data/all/08-12-2016-labelled.csv"))
     df["created_at"] = pd.to_datetime(df["created_at"])
     
     df["hour"] = df["created_at"].values.astype('<M8[h]')
@@ -56,7 +57,7 @@ def getAllTweetsAggregated():
     return pd.DataFrame(dict(neg = neg, pos = pos, spam = spam))
 
 def getAllTweetsLabelled():
-    df = pd.read_csv(getAbsPath("data/all/21-11-2016-labelled.csv"))
+    df = pd.read_csv(getAbsPath("data/all/08-12-2016-labelled.csv"))
     df["created_at"] = pd.to_datetime(df["created_at"])
     return df
 
