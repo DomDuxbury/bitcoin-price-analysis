@@ -40,8 +40,8 @@ def main():
 
     df = df.dropna() 
     # df = df.head(5)
-    # df = df.iloc[np.random.permutation(len(df))]
-    features = df.as_matrix(columns = ["hour", "Close Price", "pos_ratio", "recent_change"])#, "pos_ratio", "total", "Close Price"])
+    df = df.iloc[np.random.permutation(len(df))]
+    features = df.as_matrix(columns = ["hour", "Close Price", "pos_ratio", "total"])#, "pos_ratio", "total", "Close Price"])
                                 # "pos_ratio_hour_minus_1", "pos_ratio_hour_minus_2",
                                 # "pos_ratio_hour_minus_3", "pos_ratio_hour_minus_4",
                                 # "pos_ratio_hour_minus_5", "pos_ratio_hour_minus_6",
@@ -50,10 +50,10 @@ def main():
 
     # clf = MultinomialNB()
     # clf = tree.DecisionTreeClassifier()
-    # clf = RandomForestClassifier(n_estimators=101)
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10, 3), random_state=1)
+    clf = RandomForestClassifier(n_estimators=101)
+    # clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10, 3), random_state=1)
     
-    confusion_matrices = model_utils.cross_validate(clf, features, labels, 60)
+    confusion_matrices = model_utils.cross_validate(clf, features, labels, 10)
     model_utils.report_results(confusion_matrices)
 
 if __name__ == "__main__":

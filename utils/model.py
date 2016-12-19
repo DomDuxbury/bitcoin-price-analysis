@@ -1,24 +1,40 @@
 from __future__ import division
+from multiprocessing import Pool
+from functools import partial
 import pandas as pd
 import numpy as np
 import pydotplus
+import math
 
 def cross_validate(model, features, labels, noSections):
 
     results = []
 
-    for section in range(0,noSections):
+    # for section in range(0,noSections):
 
-        split = split_train_test(features, labels, section, noSections)
-        sampled = under_sample(split)
+    #     sampled = split_train_test(features, labels, section, noSections)
+    #     sampled = under_sample(split)
       
-        fit_model = model.fit(sampled["train"]["data"], sampled["train"]["labels"])
-        y_pred = fit_model.predict(sampled["test"]["data"])
+    #     fit_model = model.fit(sampled["train"]["data"], sampled["train"]["labels"])
+    #     y_pred = fit_model.predict(sampled["test"]["data"])
         
-        confusion_matrix = calc_confusion_matrix(sampled["test"]["labels"], y_pred)
-        results.append(confusion_matrix)
+    #     confusion_matrix = calc_confusion_matrix(sampled["test"]["labels"], y_pred)
+    #     results.append(confusion_matrix)
+    validate_split_partial = partial(validate_split, model, features, labels, noSections)
+    p = Pool(8) 
+    results = p.map(validate_split_partial, range(0, noSections))
 
     return np.array(results)
+
+def validate_split(model, features, labels, noSections, section):
+    
+    sampled = split_train_test(features, labels, section, noSections)
+    # sampled = under_sample(split)
+    
+    fit_model = model.fit(sampled["train"]["data"], sampled["train"]["labels"])
+    y_pred = fit_model.predict(sampled["test"]["data"])
+    
+    return calc_confusion_matrix(sampled["test"]["labels"], y_pred)
 
 
 def split_train_test(features, labels, section, noSections):
@@ -29,7 +45,7 @@ def split_train_test(features, labels, section, noSections):
     start = section * section_size
     end = (section + 1) * section_size
 
-    testIndexes = range(start, end+1)
+    testIndexes = range(start, end)
     trainIndexes = [n for n in range(0, row_count) if n not in set(testIndexes)]
 
     train_data = features[trainIndexes,:]
@@ -94,6 +110,9 @@ def report_results(confusion_matrices):
     for index, conf in enumerate(confusion_matrices):
 
         accuracy = (conf[0].sum()) / (conf[0].sum() + conf[1].sum())
+        if (math.isnan(accuracy)):
+            accuracy = 0
+
         accuracies.append(accuracy)
 
         print("Split %d:" % (index+1))
