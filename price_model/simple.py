@@ -23,7 +23,7 @@ def main():
 
     df = labelledTweets.join(price).dropna()
     
-    df['return'] = (df['Close Price'].shift(-9) - df['Close Price']) / df['Close Price']
+    df['return'] = (df['Close Price'].shift(-10) - df['Close Price']) / df['Close Price']
     df['recent_change'] = (df['Close Price'] - df['Close Price'].shift(1)) / df['Close Price']
     df['increase'] = df['return'] > 0
 
@@ -39,9 +39,8 @@ def main():
         # df['pos_ratio_hour_minus_' + str(hour)] = df["pos_ratio"].shift(hour)
 
     df = df.dropna() 
-    # df = df.head(5)
-    df = df.iloc[np.random.permutation(len(df))]
-    features = df.as_matrix(columns = ["hour", "Close Price", "pos_ratio", "total"])#, "pos_ratio", "total", "Close Price"])
+    # df = df.iloc[np.random.permutation(len(df))]
+    features = df.as_matrix(columns = ["hour", "Close Price", "pos_ratio", "total", "spam_ratio", "recent_change"])
                                 # "pos_ratio_hour_minus_1", "pos_ratio_hour_minus_2",
                                 # "pos_ratio_hour_minus_3", "pos_ratio_hour_minus_4",
                                 # "pos_ratio_hour_minus_5", "pos_ratio_hour_minus_6",
@@ -50,10 +49,10 @@ def main():
 
     # clf = MultinomialNB()
     # clf = tree.DecisionTreeClassifier()
-    clf = RandomForestClassifier(n_estimators=101)
-    # clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(10, 3), random_state=1)
+    # clf = RandomForestClassifier(n_estimators=101)
+    clf = MLPClassifier(solver='lbfgs', alpha=1e-7, hidden_layer_sizes=(100, 300), random_state=1)
     
-    confusion_matrices = model_utils.cross_validate(clf, features, labels, 10)
+    confusion_matrices = model_utils.cross_validate(clf, features, labels, 5)
     model_utils.report_results(confusion_matrices)
 
 if __name__ == "__main__":

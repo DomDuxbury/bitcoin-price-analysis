@@ -16,10 +16,10 @@ def main():
     df = prep_data()
 
     feature_columns = [
-            "hour", "Close Price", "recent_change",
+            "hour",  "recent_change", "Close Price",
             "ratio", "spam_ratio", "neg_ratio", "pos_ratio",
-            "total", "pos", "neg", "spam"]
-    feature_columns.reverse()
+            "total", "pos", "neg", "spam", "price_mod_10"]
+    # feature_columns.reverse()
 
     features = df.as_matrix(columns = feature_columns)
     labels = df.as_matrix(columns = ["increase"]).flatten()
@@ -44,7 +44,7 @@ def prep_data():
 
     df = labelledTweets.join(price).dropna()
     
-    df['return'] = (df['Close Price'].shift(-9) - df['Close Price']) / df['Close Price']
+    df['return'] = (df['Close Price'].shift(-3) - df['Close Price']) / df['Close Price']
     df['recent_change'] = (df['Close Price'] - df['Close Price'].shift(1)) / df['Close Price']
     df['increase'] = df['return'] > 0
 
@@ -54,6 +54,7 @@ def prep_data():
     df["pos_ratio"] = utils.compareToDailyCycle(df, "pos")
     df["neg_ratio"] = utils.compareToDailyCycle(df, "neg")
     df["spam_ratio"] = utils.compareToDailyCycle(df, "spam")
+    df["price_mod_10"] = df['Close Price'] % 10
 
     return df.dropna()
 
