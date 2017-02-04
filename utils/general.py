@@ -13,6 +13,11 @@ def getTweetsData():
     df.set_index(pd.to_datetime(df.index), inplace = True)
     return df
 
+def getBlockData():
+    df = pd.read_csv(getAbsPath("data/block-chain/block_chain_hourly.csv"), index_col=["hour"])
+    df.set_index(pd.to_datetime(df.index), inplace = True)
+    return df
+
 def getPriceData():
     oct_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-oct.csv"), index_col=["Date"])
     nov_df = pd.read_csv(getAbsPath("data/bitcoin/coindesk-nov.csv"), index_col=["Date"])

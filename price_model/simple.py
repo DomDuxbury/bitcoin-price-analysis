@@ -19,11 +19,13 @@ import utils.model as model_utils
 def main():
     price = utils.getPriceData()
     labelledTweets = utils.getAllTweetsAggregated() 
+    blocks = utils.getBlockData()
+
     labelledTweets["total"] = labelledTweets["pos"] + labelledTweets["neg"] + labelledTweets["spam"]
 
-    df = labelledTweets.join(price).dropna()
+    df = labelledTweets.join(price).join(blocks).dropna()
     
-    df['return'] = (df['Close Price'].shift(-10) - df['Close Price']) / df['Close Price']
+    df['return'] = (df['Close Price'].shift(-1) - df['Close Price']) / df['Close Price']
     df['recent_change'] = (df['Close Price'] - df['Close Price'].shift(1)) / df['Close Price']
     df['increase'] = df['return'] > 0
 
@@ -40,19 +42,30 @@ def main():
 
     df = df.dropna() 
     # df = df.iloc[np.random.permutation(len(df))]
-    features = df.as_matrix(columns = ["hour", "Close Price", "pos_ratio", "total", "spam_ratio", "recent_change"])
-                                # "pos_ratio_hour_minus_1", "pos_ratio_hour_minus_2",
-                                # "pos_ratio_hour_minus_3", "pos_ratio_hour_minus_4",
-                                # "pos_ratio_hour_minus_5", "pos_ratio_hour_minus_6",
-                                # "pos_ratio_hour_minus_7", "pos_ratio_hour_minus_8"])
+
+    feature_columns = ["Close Price", "output", "fee"]
+    # feature_columns = ["Close Price", "pos_ratio"]
+
+    features = df.as_matrix(columns = feature_columns)
     labels = df.as_matrix(columns = ["increase"]).flatten()
 
     # clf = MultinomialNB()
     # clf = tree.DecisionTreeClassifier()
-    # clf = RandomForestClassifier(n_estimators=101)
-    clf = MLPClassifier(solver='lbfgs', alpha=1e-7, hidden_layer_sizes=(100, 300), random_state=1)
+    clf = RandomForestClassifier(n_estimators=101)
+    # clf = MLPClassifier(solver='lbfgs', alpha=1e-7, hidden_layer_sizes=(100, 300), random_state=1)
+   
+    confusion_matrices = []
+
+    no_cycles = 1
+    no_splits = 10
+
+    for i in range(0,no_cycles):
+        next_matrices = model_utils.cross_validate(clf, features, labels, no_splits)
+        confusion_matrices.append(next_matrices)
     
-    confusion_matrices = model_utils.cross_validate(clf, features, labels, 5)
+    confusion_matrices = np.stack(np.array(confusion_matrices))
+    confusion_matrices = confusion_matrices.reshape(no_splits * no_cycles,2,2)
+
     model_utils.report_results(confusion_matrices)
 
 if __name__ == "__main__":

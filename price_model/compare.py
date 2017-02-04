@@ -16,9 +16,10 @@ def main():
     df = prep_data()
 
     feature_columns = [
-            "hour",  "recent_change", "Close Price",
+            "hour",  "recent_change",
             "ratio", "spam_ratio", "neg_ratio", "pos_ratio",
-            "total", "pos", "neg", "spam", "price_mod_10"]
+            "total", "pos", "neg", "spam",
+            "transactions", "blocks", "fee", "output"]
     # feature_columns.reverse()
 
     features = df.as_matrix(columns = feature_columns)
@@ -39,12 +40,14 @@ def main():
 def prep_data():
 
     price = utils.getPriceData()
+    blocks = utils.getBlockData()
     labelledTweets = utils.getAllTweetsAggregated() 
+    
     labelledTweets["total"] = labelledTweets["pos"] + labelledTweets["neg"] + labelledTweets["spam"]
 
-    df = labelledTweets.join(price).dropna()
+    df = labelledTweets.join(price).join(blocks).dropna()
     
-    df['return'] = (df['Close Price'].shift(-3) - df['Close Price']) / df['Close Price']
+    df['return'] = (df['Close Price'].shift(-10) - df['Close Price']) / df['Close Price']
     df['recent_change'] = (df['Close Price'] - df['Close Price'].shift(1)) / df['Close Price']
     df['increase'] = df['return'] > 0
 
