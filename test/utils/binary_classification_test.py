@@ -6,7 +6,7 @@ import os, sys
 utils_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 sys.path.append(utils_path)
 
-import utils.model as mu
+import utils.binary_classification as bc
 
 # def test_answer():
     
@@ -28,7 +28,7 @@ class TestSplitting:
     ])
     def test_test_labels(self, section, expected):
 
-        split = mu.split_train_test(self.features, self.labels, section, 4)
+        split = bc.split_train_test(self.features, self.labels, section, 4)
         tst.assert_array_equal(expected, split["test"]["labels"])
 
 
@@ -40,7 +40,7 @@ class TestSplitting:
     ])
     def test_test_data(self, section, expected):
 
-        split = mu.split_train_test(self.features, self.labels, section, 4)
+        split = bc.split_train_test(self.features, self.labels, section, 4)
         tst.assert_array_equal(expected, split["test"]["data"])
 
 
@@ -52,7 +52,7 @@ class TestSplitting:
     ])
     def test_train_labels(self, section, expected):
 
-        split = mu.split_train_test(self.features, self.labels, section, 4)
+        split = bc.split_train_test(self.features, self.labels, section, 4)
         tst.assert_array_equal(expected, split["train"]["labels"])
 
     @pytest.mark.parametrize("section,expected", [
@@ -63,31 +63,8 @@ class TestSplitting:
     ])
     def test_train_data(self, section, expected):
 
-        split = mu.split_train_test(self.features, self.labels, section, 4)
+        split = bc.split_train_test(self.features, self.labels, section, 4)
         tst.assert_array_equal(expected, split["train"]["data"])
-
-class TestUnderSampling:
-
-    data = {
-        "train": {
-            "data": np.array([[1],[2],[3],[4],[5]]),
-            "labels": np.array([True, True, False, True, False])
-        },
-        "test": {
-            "data": np.array([[6]]),
-            "labels": np.array([True])
-        }
-    }
-
-    def test_labels(self):
-        
-        sample = mu.under_sample(self.data)
-        tst.assert_array_equal(self.data["train"]["labels"], [False, False, True, True])
-
-    def test_data(self):
-
-        sample = mu.under_sample(self.data)
-        tst.assert_array_equal(self.data["train"]["data"], [[3], [5], [1], [2]])
 
 
 class TestCalcConfusionMatrix:
@@ -125,7 +102,7 @@ class TestCalcConfusionMatrix:
         )])
     def test_labels(self, test_labels, y_pred, expected):
         
-        confusion_matrix = mu.calc_confusion_matrix(test_labels, y_pred)
+        confusion_matrix = bc.calc_confusion_matrix(test_labels, y_pred)
         tst.assert_array_equal(expected, confusion_matrix)
 
 class TestReporting:
@@ -136,35 +113,39 @@ class TestReporting:
                             False Positives: %d
                             False Negatives: %d
                             Accuracy: %f
+                            Precision: %f
+                            Recall: %f
                         Overview:
-                            Mean Accuracy: %f"""
+                            Mean Accuracy: %f
+                            Mean Precision: %f
+                            Mean Recall: %f"""
 
-    @pytest.mark.parametrize("matrices, split, tp, tf, fp, ff, acc, mean_acc", [
+    @pytest.mark.parametrize("matrices, split, tp, tf, fp, ff, acc, prec, rec, mean_acc, mean_prec, mean_rec", [
         (
             np.array([[[0, 0], [0, 0]]]),
-            1, 0, 0, 0, 0, 0, 0
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ),
         (
             np.array([[[1, 1], [1, 1]]]),
-            1, 1, 1, 1, 1, 0.5, 0.5
+            1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5
         ),
         (
             np.array([[[0, 0], [1, 1]]]),
-            1, 0, 0, 1, 1, 0, 0
+            1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0
         ),
         (
             np.array([[[1, 1], [0, 0]]]),
-            1, 1, 1, 0, 0, 1.0, 1.0
+            1, 1, 1, 0, 0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
         ),
         (
             np.array([[[3, 5], [1, 1]]]),
-            1, 3, 5, 1, 1, 0.8, 0.8
+            1, 3, 5, 1, 1, 0.8, 0.75, 0.75, 0.8, 0.75, 0.75
         )])
-    def test_basic(self, capsys, matrices, split, tp, tf, fp, ff, acc, mean_acc):
+    def test_basic(self, capsys, matrices, split, tp, tf, fp, ff, acc, prec, rec, mean_acc, mean_prec, mean_rec):
 
-        mu.report_results(matrices)
+        bc.report_results(matrices)
         out, err = capsys.readouterr()
-        expected = "".join((self.output_template % (split, tp, tf, fp, ff, acc, mean_acc)).split())
+        expected = "".join((self.output_template % (split, tp, tf, fp, ff, acc, prec, rec, mean_acc, mean_prec, mean_rec)).split())
 
         assert "".join(out.split()) == expected
 
