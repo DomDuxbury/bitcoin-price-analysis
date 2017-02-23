@@ -4,8 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sklearn as sl
 import pydotplus
-from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 
 import os, sys
@@ -20,20 +18,26 @@ def main():
     df = prep_data()
 
     feature_columns = [
-                "Close Price", "output", "fee", "pos_ratio"
+                "Close Price", "output", "pos_ratio", "total", "fee"#, "recent_change", 
+                # "output", "fee", "transactions", "reward",
+                # "pos_ratio", "total"
             ]
+    print df.tail()
 
     features = df.as_matrix(columns = feature_columns)
     labels = df.as_matrix(columns = ["increase"]).flatten()
 
-    returns = df.as_matrix(columns = ["hourly_return"]).flatten()
-
-    clf = svm.SVC(kernel = "poly", degree = 3)
+    clf = svm.SVC(
+            kernel = "poly", 
+            degree = 3, 
+            # gamma = 0.001,
+            C = 1, 
+            decision_function_shape = 'ovr')
     
-    confusion_matrices = model_utils.cross_validate(clf, features, labels, 10, True)
-    model_utils.report_results(confusion_matrices)
+    # confusion_matrices = model_utils.cross_validate(clf, features, labels, 10, True)
+    # model_utils.report_results(confusion_matrices)
 
-    def prep_data():
+def prep_data():
 
     price = utils.getPriceData()
     labelledTweets = utils.getAllTweetsAggregated() 
